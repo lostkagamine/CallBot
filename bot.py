@@ -62,6 +62,7 @@ async def ping(ctx):
     ms = (before - after) * 1000
     await msg.edit(content=f'Pong. {-math.floor(ms)}ms')
 
+@bot.owner()
 @bot.command(aliases=['restart', 'die'])
 async def reboot(ctx):
     await ctx.send(':arrows_counterclockwise: Bot restarting.')
