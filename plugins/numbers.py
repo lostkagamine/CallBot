@@ -30,7 +30,12 @@ class Numbers:
 
         exists = (lambda: list(r.table('numbers').filter(
             lambda a: a['guild'] == str(ctx.guild.id)).run(self.conn)) != [])()
+
+        nexists = (lambda: list(r.table('numbers').filter(lambda a: a['number'] == str(number)).run(self.conn)) != [])()
         
+        if nexists:
+            return await ctx.send(':x: This number is taken.')
+
         if exists:
             return await ctx.send(':x: This guild already has a number.')
         else:

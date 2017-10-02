@@ -34,6 +34,21 @@ class CallBot(commands.Bot):
     def owner_id_check(self,_id):
         return _id in self.owners
 
+    async def on_message(self, msg):
+        if msg.author.bot:
+            return
+        if msg.guild.id in bot.switchboard.keys():
+            guild = discord.utils.find(lambda g: g.id == bot.switchboard[msg.guild.id], bot.guilds)
+            gtele = r.table('settings').filter(lambda a: str(guild.id) == a['guild']).run(self.conn)
+            try:
+                gtele = gtele.next()
+            except r.net.DefaultCursorEmpty:
+                return # THIS SHOULD NEVER, EVER, EVER HAPPEN
+            gtelech = discord.utils.find(lambda c: str(c.id) == gtele['tele_channel'], guild.channels)
+            await gtelech.send(f':telephone_receiver: **{str(msg.author)}**: {msg.content}')
+        else:
+            await self.process_commands(msg)
+
 
     def owner(self):
         return commands.check(self.is_owner_check)
@@ -67,6 +82,15 @@ async def ping(ctx):
 async def reboot(ctx):
     await ctx.send(':arrows_counterclockwise: Bot restarting.')
     sys.exit(0)
+
+@bot.owner()
+@bot.command(name='eval')
+async def _eval(ctx, *, code : str):
+    try:
+        res = eval(code)
+    except Exception as e:
+        return await ctx.send(f':x: Error\n{type(e).__name__}: {e}')
+    await ctx.send(res)
 
 for ext in os.listdir('plugins'):
     if ext.endswith('.py'):
