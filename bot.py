@@ -55,9 +55,19 @@ class CallBot(commands.Bot):
 
     def rethink(self):
         print('Attempting to connect to RethinkDB')
+        tables = ['settings', 'numbers']
         dbc = self.config.get('db')
         try:
             self.conn = r.connect(host=dbc['host'], port=dbc['port'], db=dbc['db'], user=dbc['username'], password=dbc['password'])
+            dbl = r.db_list().run(self.conn)
+            if dbc['db'] not in dbl:
+                print('Creating DB...')
+                r.db_create(dbc['db']).run(self.conn)
+            tab = r.table_list().run(self.conn)
+            for i in tables:
+                if i not in tab:
+                    print(f'Table {i} not found. Now creating...')
+                    r.table_create(i).run(self.conn)
         except Exception as e:
             print(f'DB connection failed! Exiting...\nError details:\n{type(e).__name__}: {e}')
             sys.exit(1)
