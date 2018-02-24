@@ -34,21 +34,6 @@ class CallBot(commands.Bot):
     def owner_id_check(self,_id):
         return _id in self.owners
 
-    async def on_message(self, msg):
-        if msg.author.bot:
-            return
-        if msg.guild.id in bot.switchboard.keys():
-            guild = discord.utils.find(lambda g: g.id == bot.switchboard[msg.guild.id], bot.guilds)
-            gtele = r.table('settings').filter(lambda a: str(guild.id) == a['guild']).run(self.conn)
-            try:
-                gtele = gtele.next()
-            except r.net.DefaultCursorEmpty:
-                return # THIS SHOULD NEVER, EVER, EVER HAPPEN
-            gtelech = discord.utils.find(lambda c: str(c.id) == gtele['tele_channel'], guild.channels)
-            await gtelech.send(f':telephone_receiver: **{str(msg.author)}**: {msg.content}')
-        else:
-            await self.process_commands(msg)
-
 
     def owner(self):
         return commands.check(self.is_owner_check)
